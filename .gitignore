@@ -1,3 +1,6 @@
 .vscode
 sorted
 __pycache__
+build/
+
+imagesorter.spec
