@@ -2,7 +2,7 @@
 
 from PIL import Image
 from math import sqrt
-import os
+from os import listdir, mkdir, symlink, path
 from shutil import copyfile, rmtree
 import argparse
 
@@ -22,25 +22,37 @@ def getAvgLuminance(imagePath):
 def main(srcDir, dstDir, useSymlink = True):
   luminancesDict = {}
 
-  for fileName in os.listdir(srcDir):
+  print("Source directory: "+srcDir)
+  print("Destination directory: "+dstDir)
+  if(useSymlink):
+    print("Using symlinks.")
+  print()
+
+  for fileName in listdir(srcDir):
     if fileName.endswith(".jpg") or fileName.endswith(".png") or fileName.endswith(".bmp"):
+      print("Processing "+fileName)
       luminancesDict[srcDir+fileName] = getAvgLuminance(srcDir+fileName)
 
   sortedLuminancesDict = sorted(luminancesDict.items(), key=lambda x: x[1])
 
-  if (os.path.isdir(dstDir)):
+  if (path.isdir(dstDir)):
     rmtree(dstDir)
   
-  os.mkdir(dstDir)
+  mkdir(dstDir)
 
   for i,origFile in enumerate(sortedLuminancesDict):
+    print()
     print("Source: "+origFile[0])
-    print("Dest: "+dstDir+"/"+str(i)+os.path.splitext(origFile[0])[1])
+    print("Dest: "+dstDir+"/"+str(i)+path.splitext(origFile[0])[1])
     print("Luminance: "+str(origFile[1]))
     if(useSymlink):
-      os.symlink(origFile[0], dstDir+"/"+str(i)+os.path.splitext(origFile[0])[1])
+      symlink(path.abspath(origFile[0]), dstDir+"/"+str(i)+path.splitext(origFile[0])[1])
     else:
-      copyfile(origFile[0], dstDir+"/"+str(i)+os.path.splitext(origFile[0])[1])
+      copyfile(origFile[0], dstDir+"/"+str(i)+path.splitext(origFile[0])[1])
+  
+  print()
+  print("Done!")
+  print("Processed "+str(len(sortedLuminancesDict))+" files.")
 
   return
 
